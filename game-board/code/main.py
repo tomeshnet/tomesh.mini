@@ -1,3 +1,4 @@
+# coding: utf-8
 import sys
 import time
 from node import Node
@@ -42,20 +43,27 @@ num_links = 0
 #######
 
 def main(argv):
-	init()
-	
 	# Run diagnostics
 	if RUN_DIAGNOSTICS:
+		init()
 		diag()
 
 	# Play game
+	init()
 	play()
 
 def init():
+	global all_nodes
+	global num_links
+
+	all_nodes = []
+	num_links = 0
+
 	for name in ALL_NODE_NAMES:
 		all_nodes.append(Node(name, []))
 
 def play():
+	global all_nodes
 	global num_links
 
 	# Mock player if enabled
@@ -78,7 +86,7 @@ def play():
 			for path in paths:
 				# Transition only if there is one single multi-hop path
 				if len(paths) == 1 and path.num_hops() > 1:
-					print "Communication established: %s" % node_name_array(path.hops)
+					print "Communication established: %s" % path_as_string(path)
 
 					# Remember a middle node critical for routing
 					critical = path.get_hop(1)
@@ -105,7 +113,7 @@ def play():
 			paths = []
 			node(GAME_FIRST_LINK_0).find_paths(node(GAME_FIRST_LINK_1), [], paths)
 			for path in paths:
-				print "Communication re-established: %s" % node_name_array(path.hops)
+				print "Communication re-established: %s" % path_as_string(path)
 
 			# Transition to next state of the game
 			state = 2
@@ -132,11 +140,11 @@ def play():
 			if all_connected:
 				print "Looks like you have just built the Toronto Mesh :)"
 				print ""
-				print "   _                           _     "
-				print "  | |_ ___  _ __ ___   ___ ___| |__  "
-				print "  | __/ _ \| '_ ` _ \ / _ / __| '_ \ "
-				print "  | || (_) | | | | | |  __\__ | | | |"
-				print "   \__\___/|_| |_| |_|\___|___|_| |_|"
+				print "\033[91m" + "   _       "  + "\033[97m" + "                    _     " + "\033[00m"
+				print "\033[91m" + "  | |_ ___ "  + "\033[97m" + " _ __ ___   ___ ___| |__  " + "\033[00m"
+				print "\033[91m" + "  | __/ _ \\" + "\033[97m" + "| '_ ` _ \ / _ / __| '_ \ " + "\033[00m"
+				print "\033[91m" + "  | || (_) "  + "\033[97m" + "| | | | | |  __\__ | | | |" + "\033[00m"
+				print "\033[91m" + "   \__\___/"  + "\033[97m" + "|_| |_| |_|\___|___|_| |_|" + "\033[00m"
 
 				# Transition to next state of the game
 				state = 3
@@ -179,20 +187,16 @@ def play():
 			destroy.take_offline()
 			time.sleep(GAME_STEP_DELAY)
 
-		# Find all the paths
+		# Find all the paths and sort by decreasing number of hops
 		paths = []
 		src.find_paths(dst, [], paths)
-		# TODO Sort paths list by decreasing number of hops
+		sort_paths(paths)
 
 		# Try to select a path to route
 		if len(paths) > 0:
 			# Route through the first path
 			current_path = paths[0]
-			path_string = ""
-			for hop in node_name_array(current_path.hops):
-				path_string = path_string + hop
-				if hop is not dst.name:
-					 path_string = path_string + " -> "
+			path_string = path_as_string(current_path)
 
 			# Print step
 			if destroy:
@@ -204,7 +208,7 @@ def play():
 			destroy = current_path.get_hop(current_path.num_hops() / 2)
 		else:
 			# Print destination unreachable
-			print "    %s is destroyed! %s is no longer reachable :(" % (destroy.name, dst.name)
+			print "    %s is offline! %s is no longer reachable :(" % (destroy.name, dst.name)
 			break
 
 	# Print game summary
@@ -217,6 +221,9 @@ def play():
 	print "\nYour network is able to maintain communication between %s and %s while %s nodes are offline!" % (src.name, dst.name, len(offline_nodes))
 
 def diag():
+	global all_nodes
+	global num_links
+
 	# Set up test links
 	peer(node(0), node(1))
 	peer(node(0), node(2))
@@ -246,8 +253,9 @@ def diag():
 	print "================================================================"
 	paths = []
 	node(DIAG_PATH_SEARCH_SRC).find_paths(node(DIAG_PATH_SEARCH_DST), [], paths)
+	sort_paths(paths)
 	for path in paths:
-		print node_name_array(path.hops)
+		print path_as_string(path)
 
 def name(index):
 	return ALL_NODE_NAMES[index]
@@ -265,10 +273,18 @@ def peer(node0, node1):
 		node0.add_peer(node1)
 		node1.add_peer(node0)
 
+def sort_paths(paths):
+	for i in range(len(paths)):
+		for j in range(len(paths) - 1, i, -1):
+			if (paths[j].num_hops() > paths[j - 1].num_hops()):
+				tmp = paths[j]
+				paths[j] = paths[j - 1]
+				paths[j - 1] = tmp
+
 def print_node(node):
 	print "Name: %s" % node.name
 	print "Peers: %s" % node_name_array(node.peers)
-	print "Indicator: %s" % node.indicator
+	print "Online: %s" % node.online
 	print "----------------------------------------------------------------"
 
 def node_name_array(nodes):
@@ -276,6 +292,17 @@ def node_name_array(nodes):
 	for node in nodes:
 		name_array.append(node.name)
 	return name_array
+
+def path_as_string(path):
+	node_names = node_name_array(path.hops)
+	dst_name = node_names[len(node_names) - 1]
+
+	path_string = ""
+	for hop in node_names:
+		path_string = path_string + "\033[92m" + hop + "\033[00m"
+		if hop is not dst_name:
+			 path_string = path_string + " ❯ "
+	return path_string
 
 if __name__ == "__main__":
 	main(sys.argv)
