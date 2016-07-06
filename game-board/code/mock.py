@@ -1,6 +1,8 @@
 class Mock(object):
 	"""
 	A mock player to demo the game.
+
+	@param counter: An integer representing the seconds to wait between player steps.
 	"""
 
 	def __init__(self, counter):

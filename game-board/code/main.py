@@ -2,8 +2,11 @@
 import sys
 import time
 from node import Node
+from gpio import Gpio
+from connectors import Connectors
 from path import Path
 from mock import Mock
+from picontroller import PiController
 
 ############
 # Constants
@@ -12,8 +15,36 @@ from mock import Mock
 # The game will begin with linking up the first two nodes defined in this list
 ALL_NODE_NAMES = [ "LITTLE ITALY", "CITY HALL", "ROM", "CASA LOMA", "JUNCTION", "CN TOWER", "KENSINGTON", "HIGH PARK", "LITTLE INDIA", "GREEK TOWN", "BEACHES" ]
 
+# Connectors representing GPIO groupings
+NODE_0 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPB0), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB2), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB3), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB4) ])
+NODE_1 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPB5), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA0), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA2) ])
+NODE_2 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA4), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA3) ])
+NODE_3 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPB5), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB7), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB4) ])
+NODE_4 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPB0), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB2), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB3) ])
+NODE_5 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPA3), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPA2), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA0) ])
+NODE_6 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA4) ])
+NODE_7 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPB3), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPB0), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB2) ])
+NODE_8 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPB4), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPB5), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB7) ])
+NODE_9 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPA3), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPA2), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA0) ])
+NODE_10 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA4) ])
+
+# Connectors mapping to each node
+CONNECTORS_MAP = {
+	"LITTLE ITALY": NODE_0,
+	"CITY HALL": NODE_1,
+	"ROM": NODE_2,
+	"CASA LOMA": NODE_3,
+	"JUNCTION": NODE_4,
+	"CN TOWER": NODE_5,
+	"KENSINGTON": NODE_6,
+	"HIGH PARK": NODE_7,
+	"LITTLE INDIA": NODE_8,
+	"GREEK TOWN": NODE_9,
+	"BEACHES": NODE_10
+}
+
 # Special run modes
-RUN_DIAGNOSTICS = False
+RUN_DIAGNOSTICS = True
 MOCK_MODE = True
 
 # Default game parameters
@@ -43,6 +74,9 @@ num_links = 0
 #######
 
 def main(argv):
+	# Initialize WiringPi
+	PiController().setup()
+
 	# Run diagnostics
 	if RUN_DIAGNOSTICS:
 		init()
@@ -60,7 +94,7 @@ def init():
 	num_links = 0
 
 	for name in ALL_NODE_NAMES:
-		all_nodes.append(Node(name, []))
+		all_nodes.append(Node(name, [], CONNECTORS_MAP.get(name)))
 
 def play():
 	global all_nodes
@@ -77,7 +111,7 @@ def play():
 
 	while state == 0:
 		# Scan for paths
-		scan()
+		num_links = scan()
 
 		# Check for conditions to transition to next state
 		if node(GAME_FIRST_LINK_0).has_path(node(GAME_FIRST_LINK_1)):
@@ -106,7 +140,7 @@ def play():
 
 	while state == 1:
 		# Scan for paths
-		scan()
+		num_links = scan()
 
 		# Check for conditions to transition to next state
 		if node(GAME_FIRST_LINK_0).has_path(node(GAME_FIRST_LINK_1)):
@@ -127,7 +161,10 @@ def play():
 
 	while state == 2:
 		# Scan for paths
-		scan()
+		if MOCK_MODE and player is not None:
+			scan()
+		else:
+			num_links = scan()
 
 		# Check that available links are all used up
 		if num_links == GAME_TOTAL_LINKS:
@@ -218,7 +255,7 @@ def play():
 		if not n.online:
 			offline_nodes.append(n)
 
-	print "\nYour network is able to maintain communication between %s and %s while %s nodes are offline!" % (src.name, dst.name, len(offline_nodes))
+	print "\nYour network is able to maintain communication between %s and %s while %s nodes are offline!" % (src.name, dst.name, len(offline_nodes) - 1)
 
 def diag():
 	global all_nodes
@@ -266,7 +303,21 @@ def node(index):
 def scan():
 	time.sleep(1)
 
-	# TODO Scan all possible connections and update num_links
+	num_links = 0
+
+	# Scan all possible connections
+	for node in all_nodes:
+		for tower in node.connectors.towers:
+			tower.high()
+			for detect in all_nodes:
+				if detect != node and detect not in node.peers:
+					connected_tower = detect.connectors.detect_connection()
+					if connected_tower:
+						peer(node, detect)
+						num_links += 1
+
+	return num_links
+	
 
 def peer(node0, node1):
 	if node0 is not node1:
@@ -285,6 +336,7 @@ def print_node(node):
 	print "Name: %s" % node.name
 	print "Peers: %s" % node_name_array(node.peers)
 	print "Online: %s" % node.online
+	print "Towers: %s" % len(node.connectors.towers)
 	print "----------------------------------------------------------------"
 
 def node_name_array(nodes):

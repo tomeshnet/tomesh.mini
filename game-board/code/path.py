@@ -17,3 +17,8 @@ class Path(object):
 		if hop_num <= self.num_hops():
 			return self.hops[hop_num]
 		return None
+
+	def flash(self):
+		for hop in self.hops:
+			hop.connectors.indicator_flash(1)
+			hop.connectors.indicator_on()

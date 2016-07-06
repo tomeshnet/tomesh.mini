@@ -6,20 +6,25 @@ class Node(object):
 
 	@param name: A string representing the name of a node.
 	@param peers: A list of directly connected nodes.
+	@param connectors: A list of connectors for the node.
 	@param online: A boolean representing whether the node is online.
 	"""
 
-	def __init__(self, name, peers, online=True):
+	def __init__(self, name, peers, connectors, online=True):
 		self.name = name
 		self.peers = peers
+		self.connectors = connectors
 		self.online = online
 
 	def add_peer(self, node):
 		self.peers.append(node)
 		return self
 
-	def remove_peer(self, node):
-		self.peers.remove(node)
+	def reset_indicator(self):
+		self.connectors.indicator_off()
+
+	def reset_peers(self):
+		self.peers = []
 		return self
 
 	def find_paths(self, dst, search, paths):
@@ -58,5 +63,9 @@ class Node(object):
 		return len(paths) > 0
 
 	def take_offline(self):
-		# TODO Flash dead on LED
+		# Flash indicator
+		self.connectors.indicator_flash(5)
+		self.connectors.indicator_off()
+
+		# Mark as offline
 		self.online = False
