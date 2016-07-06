@@ -1,4 +1,7 @@
-# import wiringpi
+try:
+	import wiringpi
+except:
+	pass
 
 class PiController(object):
 	"""

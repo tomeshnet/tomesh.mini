@@ -16,15 +16,16 @@ class Node(object):
 		self.connectors = connectors
 		self.online = online
 
-	def add_peer(self, node):
-		self.peers.append(node)
-		return self
-
 	def reset_indicator(self):
 		self.connectors.indicator_off()
+		return self
 
 	def reset_peers(self):
 		self.peers = []
+		return self
+
+	def add_peer(self, node):
+		self.peers.append(node)
 		return self
 
 	def find_paths(self, dst, search, paths):
