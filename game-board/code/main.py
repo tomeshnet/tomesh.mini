@@ -16,9 +16,9 @@ from picontroller import PiController
 ALL_NODE_NAMES = [ "LITTLE ITALY", "CITY HALL", "ROM", "CASA LOMA", "JUNCTION", "CN TOWER", "KENSINGTON", "HIGH PARK", "LITTLE INDIA", "GREEK TOWN", "BEACHES" ]
 
 # Special run modes
-RUN_DIAGNOSTICS = False
-MOCK_MODE = False
-DEBUG_MODE = False
+RUN_DIAGNOSTICS = True
+MOCK_MODE = True
+DEBUG_MODE = True
 
 # Default game parameters
 GAME_TOTAL_LINKS = 12
@@ -277,10 +277,10 @@ def diag():
 	peer(node(4), node(5))
 	peer(node(2), node(4))
 	peer(node(10), node(9))
-	peer(node(3), node(9))
-	peer(node(7), node(8))
-	peer(node(6), node(8))
-	peer(node(10), node(6))
+	# peer(node(3), node(9))
+	# peer(node(7), node(8))
+	# peer(node(6), node(8))
+	# peer(node(10), node(6))
 
 	# Print all nodes
 	print "Nodes"
@@ -352,7 +352,7 @@ def scan(scan_delay, debug=False):
 
 				if debug:
 					time.sleep(1)
-					
+
 			# Put back to high state
 			tower.high()
 

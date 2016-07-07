@@ -37,10 +37,10 @@ class Mock(object):
 			self.peer(all_nodes[4], all_nodes[5])
 			self.peer(all_nodes[2], all_nodes[4])
 			self.peer(all_nodes[10], all_nodes[9])
-			self.peer(all_nodes[3], all_nodes[9])
-			self.peer(all_nodes[7], all_nodes[8])
-			self.peer(all_nodes[6], all_nodes[8])
-			self.peer(all_nodes[10], all_nodes[6])
+			# self.peer(all_nodes[3], all_nodes[9])
+			# self.peer(all_nodes[7], all_nodes[8])
+			# self.peer(all_nodes[6], all_nodes[8])
+			# self.peer(all_nodes[10], all_nodes[6])
 
 	def peer(self, node0, node1):
 		if node0 is not node1:
