@@ -21,19 +21,18 @@ MOCK_MODE = False
 DEBUG_MODE = False
 
 # Default game parameters
-GAME_TOTAL_LINKS = 12
+GAME_TOTAL_LINKS = 16
 GAME_FIRST_LINK_0 = 10
 GAME_FIRST_LINK_1 = 4
 GAME_LED_FLASH_DELAY = 1
 GAME_SCAN_DELAY = 1
-GAME_STEP_DELAY = 5
+GAME_STEP_DELAY = 3
 
 # Diagnostic parameters
 DIAG_PATH_SEARCH_SRC = 0
 DIAG_PATH_SEARCH_DST = len(ALL_NODE_NAMES) - 1
 
 # Mock parameters
-MOCK_COUNTER = 1
 MOCK_FIRST_LINK_MIDDLE_NODE = 2
 MOCK_SECOND_LINK_MIDDLE_NODE = 3
 
@@ -106,7 +105,7 @@ def play():
 	# Mock player if enabled
 	player = None
 	if MOCK_MODE:
-		player = Mock(MOCK_COUNTER)
+		player = Mock(GAME_STEP_DELAY)
 
 	# STATE 0: Create a multi-hop path between GAME_FIRST_LINK_0 and GAME_FIRST_LINK_1
 	state = 0
@@ -114,7 +113,8 @@ def play():
 
 	while state == 0:
 		# Scan for paths
-		num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
+		if not MOCK_MODE:
+			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
 
 		# Check for conditions to transition to next state
 		if node(GAME_FIRST_LINK_0).has_path(node(GAME_FIRST_LINK_1)):
@@ -143,7 +143,8 @@ def play():
 
 	while state == 1:
 		# Scan for paths
-		num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
+		if not MOCK_MODE:
+			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
 
 		# Check for conditions to transition to next state
 		if node(GAME_FIRST_LINK_0).has_path(node(GAME_FIRST_LINK_1)):
@@ -164,9 +165,7 @@ def play():
 
 	while state == 2:
 		# Scan for paths
-		if MOCK_MODE and player is not None:
-			scan(GAME_SCAN_DELAY, DEBUG_MODE)
-		else:
+		if not MOCK_MODE:
 			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
 
 		# Check that available links are all used up
@@ -277,10 +276,10 @@ def diag():
 	peer(node(4), node(5))
 	peer(node(2), node(4))
 	peer(node(10), node(9))
-	# peer(node(3), node(9))
-	# peer(node(7), node(8))
-	# peer(node(6), node(8))
-	# peer(node(10), node(6))
+	peer(node(3), node(9))
+	peer(node(7), node(8))
+	peer(node(6), node(8))
+	peer(node(10), node(6))
 
 	# Print all nodes
 	print "Nodes"
