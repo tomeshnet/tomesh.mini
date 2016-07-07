@@ -349,12 +349,12 @@ def scan(scan_delay, debug=False):
 				else:
 					if debug:
 						print "DEBUG   Skipping %s\n" % detect.name
-			
-			# Put back to high state
-			tower.high()
 
 				if debug:
 					time.sleep(1)
+					
+			# Put back to high state
+			tower.high()
 
 	if debug:
 		print "DEBUG Scan completed with %s links" % links_counter
