@@ -51,5 +51,5 @@ class Gpio(object):
 
 	def is_low(self):
 		self.picontroller.pin_mode(self.pin, 0)
-		self.picontroller.pull_up_dn_control(self.pin, 1)
+		self.picontroller.pull_up_dn_control(self.pin, 2)
 		return self.picontroller.digital_read(self.pin) == 0

@@ -42,4 +42,4 @@ class PiController(object):
 		try:
 			return wiringpi.digitalRead(pin)
 		except:
-			return 0
+			return 1

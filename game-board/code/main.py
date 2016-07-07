@@ -17,16 +17,16 @@ ALL_NODE_NAMES = [ "LITTLE ITALY", "CITY HALL", "ROM", "CASA LOMA", "JUNCTION", 
 
 # Special run modes
 RUN_DIAGNOSTICS = False
-MOCK_MODE = True
-DEBUG_MODE = True
+MOCK_MODE = False
+DEBUG_MODE = False
 
 # Default game parameters
-GAME_TOTAL_LINKS = 16
-GAME_FIRST_LINK_0 = 0
-GAME_FIRST_LINK_1 = 1
-GAME_LED_FLASH_DELAY = 0
-GAME_SCAN_DELAY = 0
-GAME_STEP_DELAY = 0
+GAME_TOTAL_LINKS = 12
+GAME_FIRST_LINK_0 = 10
+GAME_FIRST_LINK_1 = 4
+GAME_LED_FLASH_DELAY = 1
+GAME_SCAN_DELAY = 1
+GAME_STEP_DELAY = 5
 
 # Diagnostic parameters
 DIAG_PATH_SEARCH_SRC = 0
@@ -52,14 +52,14 @@ NODE_10 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_2, G
 
 # Connectors mapping to each node
 CONNECTORS_MAP = {
-	"LITTLE ITALY": NODE_0,
+	"CN TOWER": NODE_0,
 	"CITY HALL": NODE_1,
-	"ROM": NODE_2,
-	"CASA LOMA": NODE_3,
-	"JUNCTION": NODE_4,
-	"CN TOWER": NODE_5,
-	"KENSINGTON": NODE_6,
-	"HIGH PARK": NODE_7,
+	"LITTLE ITALY": NODE_2,
+	"ROM": NODE_3,
+	"KENSINGTON": NODE_4,
+	"HIGH PARK": NODE_5,
+	"JUNCTION": NODE_6,
+	"CASA LOMA": NODE_7,
 	"LITTLE INDIA": NODE_8,
 	"GREEK TOWN": NODE_9,
 	"BEACHES": NODE_10
@@ -329,7 +329,7 @@ def scan(scan_delay, debug=False):
 		for tower in n.connectors.towers:
 			if debug:
 				print "DEBUG   Pinging from Tower %s\n" % tower.pin
-			tower.high()
+			tower.low()
 
 			for detect in all_nodes:
 				if detect != n and detect not in n.peers:
@@ -349,6 +349,9 @@ def scan(scan_delay, debug=False):
 				else:
 					if debug:
 						print "DEBUG   Skipping %s\n" % detect.name
+			
+			# Put back to high state
+			tower.high()
 
 				if debug:
 					time.sleep(1)

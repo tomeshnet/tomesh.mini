@@ -35,7 +35,7 @@ class Connectors(object):
 
 	def detect_connection(self):
 		for tower in self.towers:
-			if tower.is_high():
+			if tower.is_low():
 				if self.debug:
 					print "DEBUG       Tower %s connected" % tower.pin
 				return tower
