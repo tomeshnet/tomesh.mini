@@ -16,9 +16,9 @@ from picontroller import PiController
 ALL_NODE_NAMES = [ "LITTLE ITALY", "CITY HALL", "ROM", "CASA LOMA", "JUNCTION", "CN TOWER", "KENSINGTON", "HIGH PARK", "LITTLE INDIA", "GREEK TOWN", "BEACHES" ]
 
 # Special run modes
-RUN_DIAGNOSTICS = True
-MOCK_MODE = True
-DEBUG_MODE = True
+RUN_DIAGNOSTICS = False
+MOCK_MODE = False
+DEBUG_MODE = False
 
 # Default game parameters
 GAME_TOTAL_LINKS = 12
