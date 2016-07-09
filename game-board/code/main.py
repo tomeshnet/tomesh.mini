@@ -1,4 +1,5 @@
 # coding: utf-8
+import os
 import sys
 import time
 from node import Node
@@ -21,12 +22,12 @@ MOCK_MODE = False
 DEBUG_MODE = False
 
 # Default game parameters
-GAME_TOTAL_LINKS = 16
+GAME_TOTAL_LINKS = 15
 GAME_FIRST_LINK_0 = 10
 GAME_FIRST_LINK_1 = 4
-GAME_LED_FLASH_DELAY = 1
-GAME_SCAN_DELAY = 1
-GAME_STEP_DELAY = 3
+GAME_LED_FLASH_DELAY = 0
+GAME_SCAN_DELAY = 0
+GAME_STEP_DELAY = 10
 
 # Diagnostic parameters
 DIAG_PATH_SEARCH_SRC = 0
@@ -69,6 +70,8 @@ CONNECTORS_MAP = {
 ###################
 
 all_nodes = []
+connected_nodes = []
+connected_towers = []
 num_links = 0
 
 #######
@@ -90,17 +93,43 @@ def main(argv):
 
 def init():
 	global all_nodes
+	global connected_nodes
 	global num_links
+	global connected_towers
 
 	all_nodes = []
+	connected_nodes = []
 	num_links = 0
+	connected_towers = []
+
+	os.system('clear')
+
+	print "              _                          "
+	print "__      _____| | ___ ___  _ __ ___   ___ "
+	print "\ \ /\ / / _ | |/ __/ _ \| '_ ` _ \ / _ \\"
+	print " \ V  V |  __| | (_| (_) | | | | | |  __/"
+	print "  \_/\_/ \___|_|\___\___/|_| |_| |_|\___|"
+                                         
+	print " _        "
+	print "| |_ ___  "
+	print "| __/ _ \ "
+	print "| || (_) |"
+	print " \__\___/ "
+
+	print "\033[91m" + " _                           _                 _       _ " + "\033[00m"
+	print "\033[91m" + "| |_ ___  _ __ ___   ___ ___| |__    _ __ ___ (_)_ __ (_)" + "\033[00m"
+	print "\033[91m" + "| __/ _ \| '_ ` _ \ / _ / __| '_ \  | '_ ` _ \| | '_ \| |" + "\033[00m"
+	print "\033[91m" + "| || (_) | | | | | |  __\__ | | | |_| | | | | | | | | | |" + "\033[00m"
+	print "\033[91m" + " \__\___/|_| |_| |_|\___|___|_| |_(_|_| |_| |_|_|_| |_|_|" + "\033[00m"
 
 	for name in ALL_NODE_NAMES:
 		all_nodes.append(Node(name, [], CONNECTORS_MAP.get(name)))
 
 def play():
 	global all_nodes
+	global connected_nodes
 	global num_links
+	global connected_towers
 
 	# Mock player if enabled
 	player = None
@@ -114,7 +143,7 @@ def play():
 	while state == 0:
 		# Scan for paths
 		if not MOCK_MODE:
-			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
+			num_links = scan(connected_nodes, connected_towers, DEBUG_MODE)
 
 		# Check for conditions to transition to next state
 		if node(GAME_FIRST_LINK_0).has_path(node(GAME_FIRST_LINK_1)):
@@ -124,6 +153,8 @@ def play():
 				# Transition only if there is one single multi-hop path
 				if len(paths) == 1 and path.num_hops() > 1:
 					print "Communication established: %s" % path_as_string(path)
+					for i in range(3):
+						path.flash()
 
 					# Remember a middle node critical for routing
 					critical = path.get_hop(1)
@@ -144,7 +175,7 @@ def play():
 	while state == 1:
 		# Scan for paths
 		if not MOCK_MODE:
-			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
+			num_links = scan(connected_nodes, connected_towers, DEBUG_MODE)
 
 		# Check for conditions to transition to next state
 		if node(GAME_FIRST_LINK_0).has_path(node(GAME_FIRST_LINK_1)):
@@ -152,7 +183,8 @@ def play():
 			node(GAME_FIRST_LINK_0).find_paths(node(GAME_FIRST_LINK_1), [], paths)
 			for path in paths:
 				print "Communication re-established: %s" % path_as_string(path)
-
+				for i in range(3):
+					path.flash()
 			# Transition to next state of the game
 			state = 2
 
@@ -166,7 +198,7 @@ def play():
 	while state == 2:
 		# Scan for paths
 		if not MOCK_MODE:
-			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
+			num_links = scan(connected_nodes, connected_towers, DEBUG_MODE)
 
 		# Check that available links are all used up
 		if num_links == GAME_TOTAL_LINKS:
@@ -242,6 +274,9 @@ def play():
 				print "    %s is offline! Reconnecting through: %s" % (destroy.name, path_string)
 			else:
 				print "    Connecting through: %s" % path_string
+			
+			for i in range(3):
+				current_path.flash()
 
 			# Pick an intermediate node to destroy
 			destroy = current_path.get_hop(current_path.num_hops() / 2)
@@ -261,6 +296,7 @@ def play():
 
 def diag():
 	global all_nodes
+	global connected_nodes
 	global num_links
 
 	# Set up test links
@@ -302,9 +338,7 @@ def name(index):
 def node(index):
 	return all_nodes[index]
 
-def scan(scan_delay, debug=False):
-	time.sleep(scan_delay)
-
+def scan(connected_nodes, connected_towers, debug=False):
 	# Reset state
 	if debug:
 		print ""
@@ -342,6 +376,17 @@ def scan(scan_delay, debug=False):
 
 						peer(n, detect)
 						links_counter += 1
+
+						is_existing_connection = False
+						new_connection = { tower, connected_tower }
+						for connection in connected_towers:
+							if new_connection == connection:
+								is_existing_connection = True
+								break
+
+						if not is_existing_connection:
+							print "\033[92m%s\033[00m is now connected to \033[92m%s\033[00m" % (n.name, detect.name)
+							connected_towers.append(new_connection)
 					else:
 						if debug:
 							print "DEBUG     %s not connected\n" % detect.name
@@ -354,6 +399,10 @@ def scan(scan_delay, debug=False):
 
 			# Put back to high state
 			tower.high()
+		
+		if n.online and n.has_online_peer() and n not in connected_nodes:
+			# print '%s has joined the network through %s!' % (n.name, n.peers[0].name)
+			connected_nodes.append(n)
 
 	if debug:
 		print "DEBUG Scan completed with %s links" % links_counter
@@ -365,6 +414,11 @@ def peer(node0, node1):
 	if node0 is not node1:
 		node0.add_peer(node1)
 		node1.add_peer(node0)
+		
+		if node0.online:
+			node0.connectors.indicator_on()
+		if node1.online:
+			node1.connectors.indicator_on()
 
 def sort_paths(paths):
 	for i in range(len(paths)):

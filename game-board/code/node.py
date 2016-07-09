@@ -28,6 +28,12 @@ class Node(object):
 		self.peers.append(node)
 		return self
 
+	def has_online_peer(self):
+		for peer in self.peers:
+			if peer.online:
+				return True
+		return False
+
 	def find_paths(self, dst, search, paths):
 		# Reject cyclic paths
 		if self in search:

@@ -20,5 +20,4 @@ class Path(object):
 
 	def flash(self):
 		for hop in self.hops:
-			hop.connectors.indicator_flash(1)
 			hop.connectors.indicator_on()
