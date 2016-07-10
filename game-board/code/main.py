@@ -1,4 +1,5 @@
 # coding: utf-8
+import os
 import sys
 import time
 from node import Node
@@ -21,12 +22,10 @@ MOCK_MODE = False
 DEBUG_MODE = False
 
 # Default game parameters
-GAME_TOTAL_LINKS = 16
+GAME_TOTAL_LINKS = 15
 GAME_FIRST_LINK_0 = 10
 GAME_FIRST_LINK_1 = 4
-GAME_LED_FLASH_DELAY = 1
-GAME_SCAN_DELAY = 1
-GAME_STEP_DELAY = 3
+GAME_STEP_DELAY = 8
 
 # Diagnostic parameters
 DIAG_PATH_SEARCH_SRC = 0
@@ -37,17 +36,17 @@ MOCK_FIRST_LINK_MIDDLE_NODE = 2
 MOCK_SECOND_LINK_MIDDLE_NODE = 3
 
 # Connectors representing GPIO groupings
-NODE_0 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPB0), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB2), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB3), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB4) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_1 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPB5), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA0), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA2) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_2 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA4), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA3) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_3 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPB5), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB7), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB4) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_4 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPB0), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB2), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB3) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_5 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPA3), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPA2), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA0) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_6 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA4) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_7 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPB3), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPB0), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB2) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_8 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPB4), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPB5), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB7) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_9 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPA3), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPA2), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA0) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
-NODE_10 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA4) ], GAME_LED_FLASH_DELAY, DEBUG_MODE)
+NODE_0 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPB0), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB2), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB3), Gpio(Gpio.BUS_ADDR_0, Gpio.GPB4) ], DEBUG_MODE)
+NODE_1 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPB5), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA0), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA2) ], DEBUG_MODE)
+NODE_2 = Connectors(Gpio(Gpio.BUS_ADDR_0, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_0, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA4), Gpio(Gpio.BUS_ADDR_0, Gpio.GPA3) ], DEBUG_MODE)
+NODE_3 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPB5), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB7), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB4) ], DEBUG_MODE)
+NODE_4 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPB0), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB2), Gpio(Gpio.BUS_ADDR_1, Gpio.GPB3) ], DEBUG_MODE)
+NODE_5 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPA3), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPA2), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA0) ], DEBUG_MODE)
+NODE_6 = Connectors(Gpio(Gpio.BUS_ADDR_1, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_1, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_1, Gpio.GPA4) ], DEBUG_MODE)
+NODE_7 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPB3), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPB0), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB1), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB2) ], DEBUG_MODE)
+NODE_8 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPB4), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPB5), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB6), Gpio(Gpio.BUS_ADDR_2, Gpio.GPB7) ], DEBUG_MODE)
+NODE_9 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPA3), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPA2), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA1), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA0) ], DEBUG_MODE)
+NODE_10 = Connectors(Gpio(Gpio.BUS_ADDR_2, Gpio.GPA7), [ Gpio(Gpio.BUS_ADDR_2, Gpio.GPA6), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA5), Gpio(Gpio.BUS_ADDR_2, Gpio.GPA4) ], DEBUG_MODE)
 
 # Connectors mapping to each node
 CONNECTORS_MAP = {
@@ -69,7 +68,7 @@ CONNECTORS_MAP = {
 ###################
 
 all_nodes = []
-num_links = 0
+connected_towers = []
 
 #######
 # Main
@@ -83,24 +82,46 @@ def main(argv):
 	if RUN_DIAGNOSTICS:
 		init()
 		diag()
-
-	# Play game
-	init()
-	play()
+	else:
+		# Play game
+		init()
+		play()
 
 def init():
 	global all_nodes
-	global num_links
+	global connected_towers
 
 	all_nodes = []
-	num_links = 0
+	connected_towers = []
+
+	os.system('clear')
+
+	print "              _                          "
+	print "__      _____| | ___ ___  _ __ ___   ___ "
+	print "\ \ /\ / / _ | |/ __/ _ \| '_ ` _ \ / _ \\"
+	print " \ V  V |  __| | (_| (_) | | | | | |  __/"
+	print "  \_/\_/ \___|_|\___\___/|_| |_| |_|\___|"
+                                         
+	print " _        "
+	print "| |_ ___  "
+	print "| __/ _ \ "
+	print "| || (_) |"
+	print " \__\___/ "
+
+	print "\033[91m" + " _                           _                 _       _ " + "\033[00m"
+	print "\033[91m" + "| |_ ___  _ __ ___   ___ ___| |__    _ __ ___ (_)_ __ (_)" + "\033[00m"
+	print "\033[91m" + "| __/ _ \| '_ ` _ \ / _ / __| '_ \  | '_ ` _ \| | '_ \| |" + "\033[00m"
+	print "\033[91m" + "| || (_) | | | | | |  __\__ | | | |_| | | | | | | | | | |" + "\033[00m"
+	print "\033[91m" + " \__\___/|_| |_| |_|\___|___|_| |_(_|_| |_| |_|_|_| |_|_|" + "\033[00m"
 
 	for name in ALL_NODE_NAMES:
 		all_nodes.append(Node(name, [], CONNECTORS_MAP.get(name)))
 
 def play():
 	global all_nodes
-	global num_links
+	global connected_towers
+
+	num_links = 0
 
 	# Mock player if enabled
 	player = None
@@ -114,7 +135,7 @@ def play():
 	while state == 0:
 		# Scan for paths
 		if not MOCK_MODE:
-			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
+			num_links = scan(connected_towers, DEBUG_MODE)
 
 		# Check for conditions to transition to next state
 		if node(GAME_FIRST_LINK_0).has_path(node(GAME_FIRST_LINK_1)):
@@ -144,7 +165,7 @@ def play():
 	while state == 1:
 		# Scan for paths
 		if not MOCK_MODE:
-			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
+			num_links = scan(connected_towers, DEBUG_MODE)
 
 		# Check for conditions to transition to next state
 		if node(GAME_FIRST_LINK_0).has_path(node(GAME_FIRST_LINK_1)):
@@ -166,7 +187,7 @@ def play():
 	while state == 2:
 		# Scan for paths
 		if not MOCK_MODE:
-			num_links = scan(GAME_SCAN_DELAY, DEBUG_MODE)
+			num_links = scan(connected_towers, DEBUG_MODE)
 
 		# Check that available links are all used up
 		if num_links == GAME_TOTAL_LINKS:
@@ -215,6 +236,11 @@ def play():
 				dst = n
 				max_num_paths = num_paths
 
+	# Check if destination node cannot be selected due to disjoint network
+	if dst == None:
+		print "\n Some communities are not reachable from %s :(" % src.name
+		sys.exit()
+
 	# Start the scoring steps
 	print "\nLet's see how well it holds up. %s calling %s ..." % (src.name, dst.name)
 
@@ -261,7 +287,7 @@ def play():
 
 def diag():
 	global all_nodes
-	global num_links
+	global connected_towers
 
 	# Set up test links
 	peer(node(0), node(1))
@@ -279,7 +305,6 @@ def diag():
 	peer(node(3), node(9))
 	peer(node(7), node(8))
 	peer(node(6), node(8))
-	peer(node(10), node(6))
 
 	# Print all nodes
 	print "Nodes"
@@ -302,9 +327,7 @@ def name(index):
 def node(index):
 	return all_nodes[index]
 
-def scan(scan_delay, debug=False):
-	time.sleep(scan_delay)
-
+def scan(connected_towers, debug=False):
 	# Reset state
 	if debug:
 		print ""
@@ -317,9 +340,6 @@ def scan(scan_delay, debug=False):
 
 	if debug:
 		print ""
-
-	# Count number of links
-	links_counter = 0
 
 	# Scan all possible connections
 	for n in all_nodes:
@@ -340,8 +360,22 @@ def scan(scan_delay, debug=False):
 						if debug:
 							print "DEBUG     %s connected at Tower %s\n" % (detect.name, connected_tower.pin)
 
+						# Peer the nodes
 						peer(n, detect)
-						links_counter += 1
+
+						# Check if link is a known
+						is_existing_connection = False
+						new_connection = { tower, connected_tower }
+						for connection in connected_towers:
+							if new_connection == connection:
+								is_existing_connection = True
+								break
+
+						if not is_existing_connection:
+							print "\033[92m%s\033[00m is now connected to \033[92m%s\033[00m" % (n.name, detect.name)
+
+							# Add new link to existing list
+							connected_towers.append(new_connection)
 					else:
 						if debug:
 							print "DEBUG     %s not connected\n" % detect.name
@@ -355,16 +389,23 @@ def scan(scan_delay, debug=False):
 			# Put back to high state
 			tower.high()
 
+	num_links = len(connected_towers)
 	if debug:
-		print "DEBUG Scan completed with %s links" % links_counter
+		print "DEBUG Scan completed with %s links" % num_links
 
-	return links_counter
+	return num_links
 	
 
 def peer(node0, node1):
 	if node0 is not node1:
 		node0.add_peer(node1)
 		node1.add_peer(node0)
+
+		# Turn on indicators
+		if node0.online:
+			node0.connectors.indicator_on()
+		if node1.online:
+			node1.connectors.indicator_on()
 
 def sort_paths(paths):
 	for i in range(len(paths)):

@@ -24,7 +24,7 @@ class Mock(object):
 
 	def state_2_to_3(self, all_nodes):
 		time.sleep(self.delay)
-		
+
 		self.peer(all_nodes[0], all_nodes[1])
 		self.peer(all_nodes[0], all_nodes[2])
 		self.peer(all_nodes[10], all_nodes[7])
@@ -40,7 +40,6 @@ class Mock(object):
 		self.peer(all_nodes[3], all_nodes[9])
 		self.peer(all_nodes[7], all_nodes[8])
 		self.peer(all_nodes[6], all_nodes[8])
-		self.peer(all_nodes[10], all_nodes[6])
 
 	def peer(self, node0, node1):
 		if node0 is not node1:

@@ -64,8 +64,7 @@ class Node(object):
 		return len(paths) > 0
 
 	def take_offline(self):
-		# Flash indicator
-		self.connectors.indicator_flash(5)
+		# Turn off indicator
 		self.connectors.indicator_off()
 
 		# Mark as offline
