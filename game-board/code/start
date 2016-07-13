@@ -1,1 +1,1 @@
-ps -ax | grep python | awk '{print }' | xargs kill -9 ; python main.py
+ps -ax | grep python | awk '{print $1}' | xargs kill -9 ; python main.py
